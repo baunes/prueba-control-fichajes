@@ -1,17 +1,16 @@
 package com.prueba.controlfichajes.web;
 
 import com.prueba.controlfichajes.dto.RecordDTO;
+import com.prueba.controlfichajes.dto.WeekRecordsDTO;
 import com.prueba.controlfichajes.service.RecordService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -38,6 +37,15 @@ public class RecordController {
         return ResponseEntity
                 .created(new URI(URI_BASE))
                 .body(created);
+    }
+
+    @GetMapping(RecordController.URI_BASE + "/{employeeId}/{fromDate}/{toDate}")
+    public ResponseEntity<WeekRecordsDTO> getWeek(
+            @PathVariable String employeeId,
+            @PathVariable String fromDate,
+            @PathVariable String toDate) {
+        return ResponseEntity
+                .ok(recordService.getWeekRecords(employeeId, LocalDate.parse(fromDate), LocalDate.parse(toDate)));
     }
 
 }

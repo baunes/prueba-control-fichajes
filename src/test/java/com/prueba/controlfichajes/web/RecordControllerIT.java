@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -147,6 +148,18 @@ public class RecordControllerIT {
         // Validate the Record in the database
         List<Record> recordList = recordRepository.findAll();
         assertThat(recordList).hasSize(databaseSizeBeforeCreate + length);
+    }
+
+    @Test
+    @Transactional
+    public void getWeekByEmployeeAndDates() throws Exception {
+        importRealJsonData("/data/fichero_week.json", 102);
+
+        restRecordMockMvc.perform(get("/api/records/{employeeId}/{fromDate}/{toDate}", "111111111",
+                "2018-01-01", "2018-01-07")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 
     private static class TemporalStringMatcher extends BaseMatcher<String> {

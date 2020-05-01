@@ -5,6 +5,7 @@ import com.prueba.controlfichajes.ControlFichajesApplication;
 import com.prueba.controlfichajes.dto.RecordDTOMapper;
 import com.prueba.controlfichajes.model.Record;
 import com.prueba.controlfichajes.repository.RecordRepository;
+import org.apache.commons.io.IOUtils;
 import org.exparity.hamcrest.date.ZonedDateTimeMatchers;
 import org.exparity.hamcrest.date.core.TemporalMatcher;
 import org.hamcrest.BaseMatcher;
@@ -17,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -70,6 +72,81 @@ public class RecordControllerIT {
         // Validate the Record in the database
         List<Record> recordList = recordRepository.findAll();
         assertThat(recordList).hasSize(databaseSizeBeforeCreate + 1);
+    }
+
+    @Test
+    @Transactional
+    public void createAllRecords() throws Exception {
+        int databaseSizeBeforeCreate = recordRepository.findAll().size();
+
+        String dtos = "[" +
+                "{\"businessId\": \"1\"," +
+                " \"date\": \"2018-01-01T08:00:00.000Z\"," +
+                " \"employeeId\": \"02_000064\"," +
+                " \"recordType\": \"IN\"," +
+                " \"serviceId\": \"ATALAYAS\"," +
+                " \"type\": \"WORK\"}," +
+                "{\"businessId\": \"1\"," +
+                " \"date\": \"2018-01-01T13:30:00.000Z\"," +
+                " \"employeeId\": \"02_000064\"," +
+                " \"recordType\": \"OUT\",\n" +
+                " \"serviceId\": \"ATALAYAS\",\n" +
+                " \"type\": \"WORK\"}" +
+                "]";
+
+        // Create the Record
+        restRecordMockMvc.perform(post("/api/records/all")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(dtos))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$.[0].businessId").value("1"))
+                .andExpect(jsonPath("$.[0].date").value(TemporalStringMatcher.match("2018-01-01T08:00:00.000Z")))
+                .andExpect(jsonPath("$.[0].employeeId").value("02_000064"))
+                .andExpect(jsonPath("$.[0].recordType").value("IN"))
+                .andExpect(jsonPath("$.[0].serviceId").value("ATALAYAS"))
+                .andExpect(jsonPath("$.[0].type").value("WORK"))
+                .andExpect(jsonPath("$.[1].businessId").value("1"))
+                .andExpect(jsonPath("$.[1].date").value(TemporalStringMatcher.match("2018-01-01T13:30:00.000Z")))
+                .andExpect(jsonPath("$.[1].employeeId").value("02_000064"))
+                .andExpect(jsonPath("$.[1].recordType").value("OUT"))
+                .andExpect(jsonPath("$.[1].serviceId").value("ATALAYAS"))
+                .andExpect(jsonPath("$.[1].type").value("WORK"));
+
+        // Validate the Record in the database
+        List<Record> recordList = recordRepository.findAll();
+        assertThat(recordList).hasSize(databaseSizeBeforeCreate + 2);
+    }
+
+    @Test
+    @Transactional
+    public void importRealJsonData1() throws Exception {
+        importRealJsonData("/data/fichero_1.json", 395);
+    }
+
+    @Test
+    @Transactional
+    public void importRealJsonData2() throws Exception {
+        importRealJsonData("/data/fichero_2.json", 491);
+    }
+
+    private void importRealJsonData(String file, int length) throws Exception {
+        int databaseSizeBeforeCreate = recordRepository.findAll().size();
+
+        String json = IOUtils.toString(this.getClass().getResourceAsStream(file), StandardCharsets.UTF_8);
+
+        // Create the Record
+        restRecordMockMvc.perform(post("/api/records/all")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.length()").value(length));
+
+        // Validate the Record in the database
+        List<Record> recordList = recordRepository.findAll();
+        assertThat(recordList).hasSize(databaseSizeBeforeCreate + length);
     }
 
     private static class TemporalStringMatcher extends BaseMatcher<String> {

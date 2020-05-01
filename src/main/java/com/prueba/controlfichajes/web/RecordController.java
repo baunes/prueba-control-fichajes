@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 @RestController
 @RequestMapping
@@ -28,6 +29,14 @@ public class RecordController {
         RecordDTO created = recordService.create(dto);
         return ResponseEntity
                 .created(new URI(String.format("%s/%s", URI_BASE, created.getId())))
+                .body(created);
+    }
+
+    @PostMapping(RecordController.URI_BASE + "/all")
+    public ResponseEntity<List<RecordDTO>> createAll(@Valid @RequestBody List<RecordDTO> dtos) throws URISyntaxException {
+        List<RecordDTO> created = recordService.createAll(dtos);
+        return ResponseEntity
+                .created(new URI(URI_BASE))
                 .body(created);
     }
 

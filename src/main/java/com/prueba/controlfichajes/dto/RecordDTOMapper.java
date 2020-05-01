@@ -14,7 +14,7 @@ public interface RecordDTOMapper {
     @Mapping(source = "serviceType", target = "type")
     RecordDTO toDto(Record entity);
 
-    List<Record> toEntity(List<RecordDTO> dtoList);
+    List<Record> toEntityList(List<RecordDTO> dtoList);
 
-    List<RecordDTO> toDto(List<Record> entityList);
+    List<RecordDTO> toDtoList(List<Record> entityList);
 }

@@ -71,7 +71,7 @@ public class RecordDTOMapperTest {
         dto.setType(ServiceType.WORK);
 
         RecordDTOMapper mapper = new RecordDTOMapperImpl();
-        List<Record> records = mapper.toEntity(Arrays.asList(dto));
+        List<Record> records = mapper.toEntityList(Arrays.asList(dto));
 
         assertThat(records).hasSize(1);
         assertThat(records.get(0).getId()).isEqualTo(dto.getId());
@@ -95,7 +95,7 @@ public class RecordDTOMapperTest {
         record.setServiceType(ServiceType.WORK);
 
         RecordDTOMapper mapper = new RecordDTOMapperImpl();
-        List<RecordDTO> dtos = mapper.toDto(Arrays.asList(record));
+        List<RecordDTO> dtos = mapper.toDtoList(Arrays.asList(record));
 
         assertThat(dtos).hasSize(1);
         assertThat(dtos.get(0).getId()).isEqualTo(record.getId());

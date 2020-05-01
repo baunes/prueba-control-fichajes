@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Service
 @Transactional
@@ -24,5 +25,12 @@ public class RecordService {
         record = this.recordRepository.save(record);
         return this.recordDTOMapper.toDto(record);
     }
+
+    public List<RecordDTO> createAll(List<RecordDTO> dtos) {
+        List<Record> records = this.recordDTOMapper.toEntityList(dtos);
+        records = this.recordRepository.saveAll(records);
+        return this.recordDTOMapper.toDtoList(records);
+    }
+
 
 }

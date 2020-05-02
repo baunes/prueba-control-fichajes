@@ -1,6 +1,6 @@
 package com.prueba.controlfichajes.dto;
 
-import com.prueba.controlfichajes.model.Record;
+import com.prueba.controlfichajes.model.records.Record;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

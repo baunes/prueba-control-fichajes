@@ -1,6 +1,6 @@
 package com.prueba.controlfichajes.repository;
 
-import com.prueba.controlfichajes.model.Record;
+import com.prueba.controlfichajes.model.records.Record;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.ZonedDateTime;

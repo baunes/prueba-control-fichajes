@@ -1,4 +1,4 @@
-package com.prueba.controlfichajes.model;
+package com.prueba.controlfichajes.model.alarms;
 
 public enum DayType {
     MONDAY,

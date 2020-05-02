@@ -1,5 +1,7 @@
 package com.prueba.controlfichajes.model;
 
+import com.prueba.controlfichajes.model.alarms.DayType;
+
 import java.time.DayOfWeek;
 
 public final class ModelUtils {

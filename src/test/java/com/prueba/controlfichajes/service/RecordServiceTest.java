@@ -2,9 +2,9 @@ package com.prueba.controlfichajes.service;
 
 import com.prueba.controlfichajes.dto.RecordDTO;
 import com.prueba.controlfichajes.dto.RecordDTOMapperImpl;
-import com.prueba.controlfichajes.model.Record;
-import com.prueba.controlfichajes.model.RecordType;
-import com.prueba.controlfichajes.model.ServiceType;
+import com.prueba.controlfichajes.model.records.Record;
+import com.prueba.controlfichajes.model.records.RecordType;
+import com.prueba.controlfichajes.model.records.ServiceType;
 import com.prueba.controlfichajes.repository.RecordRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,9 +30,9 @@ public class RecordServiceTest {
     private RecordRepository recordRepository;
 
     @BeforeEach
-    public void setUpTest(@Mock RecordRepository recordRepository) {
+    public void setUpTest(@Mock RecordRepository recordRepository, @Mock AlarmService alarmService) {
         this.recordRepository = recordRepository;
-        this.service = new RecordService(recordRepository, new RecordDTOMapperImpl());
+        this.service = new RecordService(recordRepository, new RecordDTOMapperImpl(), alarmService);
     }
 
     @Test

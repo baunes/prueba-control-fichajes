@@ -1,4 +1,4 @@
-package com.prueba.controlfichajes.model;
+package com.prueba.controlfichajes.model.records;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -5,7 +5,7 @@ import com.prueba.controlfichajes.dto.RecordDTOMapper;
 import com.prueba.controlfichajes.dto.RecordsDayDTO;
 import com.prueba.controlfichajes.dto.RecordsRangeDTO;
 import com.prueba.controlfichajes.model.ModelUtils;
-import com.prueba.controlfichajes.model.Record;
+import com.prueba.controlfichajes.model.records.Record;
 import com.prueba.controlfichajes.repository.RecordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +27,7 @@ public class RecordService {
 
     private final RecordRepository recordRepository;
     private final RecordDTOMapper recordDTOMapper;
+    private final AlarmService alarmService;
 
     public RecordDTO create(RecordDTO dto) {
         Record record = this.recordDTOMapper.toEntity(dto);
@@ -40,7 +41,15 @@ public class RecordService {
         return this.recordDTOMapper.toDtoList(records);
     }
 
-    public RecordsRangeDTO getRangeRecords(String employeeId, LocalDate fromDate, LocalDate toDate) {
+    /**
+     * Obtiene los registros (y alarmas si las hibiera) para el usuario y las fechas indicadas.
+     *
+     * @param employeeId Id del empleado.
+     * @param fromDate   Fecha inicial.
+     * @param toDate     Fecha final.
+     * @return DTO con los valores
+     */
+    public RecordsRangeDTO getRangeRecordsWithAlarms(String employeeId, LocalDate fromDate, LocalDate toDate) {
         ZonedDateTime fromDateZoned = fromDate.atTime(0, 0, 0, 0).atZone(ZoneId.of("Z"));
         ZonedDateTime toDateZoned = toDate.atTime(23, 59, 59, 999).atZone(ZoneId.of("Z"));
         List<Record> records = this.recordRepository.findAllByEmployeeIdAndDateBetweenOrderByDate(employeeId, fromDateZoned, toDateZoned);
@@ -48,15 +57,15 @@ public class RecordService {
     }
 
     private RecordsRangeDTO parseRangeRecords(LocalDate fromDate, LocalDate toDate, List<Record> records) {
-        LinkedHashMap<LocalDate, RecordsDayDTO> map = initializeMap(fromDate, toDate);
+        LinkedHashMap<LocalDate, RecordsDayDTO> map = initializeRecordsDayDTO(fromDate, toDate);
         records.stream()
                 .map(this.recordDTOMapper::toDto)
                 .forEach(record -> map.get(record.getDate().toLocalDate()).getRecords().add(record));
-
+        map.forEach((date, day) -> alarmService.checkRecordsWithAlarms(day.getRecords()).ifPresent(day.getAlarms()::addAll));
         return RecordsRangeDTO.builder().days(new ArrayList<>(map.values())).build();
     }
 
-    private LinkedHashMap<LocalDate, RecordsDayDTO> initializeMap(LocalDate fromDate, LocalDate toDate) {
+    private LinkedHashMap<LocalDate, RecordsDayDTO> initializeRecordsDayDTO(LocalDate fromDate, LocalDate toDate) {
         LinkedHashMap<LocalDate, RecordsDayDTO> map = new LinkedHashMap<>();
         for (LocalDate currentDate = fromDate; currentDate.compareTo(toDate) <= 0; currentDate = currentDate.plusDays(1)) {
             map.put(currentDate, initializeDayRecordsDTO(currentDate));

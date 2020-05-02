@@ -45,7 +45,7 @@ public class RecordController {
             @PathVariable String fromDate,
             @PathVariable String toDate) {
         return ResponseEntity
-                .ok(recordService.getRangeRecords(employeeId, LocalDate.parse(fromDate), LocalDate.parse(toDate)));
+                .ok(recordService.getRangeRecordsWithAlarms(employeeId, LocalDate.parse(fromDate), LocalDate.parse(toDate)));
     }
 
 }

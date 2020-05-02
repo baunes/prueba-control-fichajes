@@ -1,8 +1,8 @@
 package com.prueba.controlfichajes.dto;
 
-import com.prueba.controlfichajes.model.Record;
-import com.prueba.controlfichajes.model.RecordType;
-import com.prueba.controlfichajes.model.ServiceType;
+import com.prueba.controlfichajes.model.records.Record;
+import com.prueba.controlfichajes.model.records.RecordType;
+import com.prueba.controlfichajes.model.records.ServiceType;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZonedDateTime;

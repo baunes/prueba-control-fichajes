@@ -3,14 +3,16 @@ package com.prueba.controlfichajes.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prueba.controlfichajes.ControlFichajesApplication;
 import com.prueba.controlfichajes.dto.RecordDTOMapper;
-import com.prueba.controlfichajes.model.Record;
-import com.prueba.controlfichajes.model.DayType;
+import com.prueba.controlfichajes.model.alarms.AlarmConfiguration;
+import com.prueba.controlfichajes.model.alarms.AlarmConfigurationDays;
+import com.prueba.controlfichajes.model.alarms.AlarmType;
+import com.prueba.controlfichajes.model.records.Record;
+import com.prueba.controlfichajes.model.alarms.DayType;
+import com.prueba.controlfichajes.repository.AlarmRepository;
 import com.prueba.controlfichajes.repository.RecordRepository;
+import com.prueba.controlfichajes.tests.TemporalStringMatcher;
 import org.apache.commons.io.IOUtils;
-import org.exparity.hamcrest.date.ZonedDateTimeMatchers;
-import org.exparity.hamcrest.date.core.TemporalMatcher;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,8 +22,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.time.DayOfWeek;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +38,8 @@ public class RecordControllerIT {
 
     @Autowired
     private RecordRepository recordRepository;
+    @Autowired
+    private AlarmRepository alarmRepository;
 
     @Autowired
     private RecordDTOMapper recordDTOMapper;
@@ -153,7 +158,7 @@ public class RecordControllerIT {
 
     @Test
     @Transactional
-    public void getWeekByEmployeeAndDates2() throws Exception {
+    public void getWeekByEmployeeAndDates() throws Exception {
         importRealJsonData("/data/fichero_week.json", 102);
 
         restRecordMockMvc.perform(get("/api/records/{employeeId}/{fromDate}/{toDate}", "111111111",
@@ -185,27 +190,53 @@ public class RecordControllerIT {
                 .andExpect(jsonPath("$.days[6].date").value("2018-01-07"));
     }
 
-    private static class TemporalStringMatcher extends BaseMatcher<String> {
+    @Test
+    @Transactional
+    public void getWeekByEmployeeAndDatesWithAlarms() throws Exception {
+        importRealJsonData("/data/file_alarm_record_incomplete.json", 7);
+        createAlarmConfiguration();
 
-        private final TemporalMatcher<ZonedDateTime> matcher;
+        restRecordMockMvc.perform(get("/api/records/{employeeId}/{fromDate}/{toDate}", "111111111",
+                "2018-01-01", "2018-01-02")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.days.length()").value(2))
+                .andExpect(jsonPath("$.days[0].records.length()").value(4))
+                .andExpect(jsonPath("$.days[0].dayType").value(DayType.MONDAY.toString()))
+                .andExpect(jsonPath("$.days[0].date").value("2018-01-01"))
+                .andExpect(jsonPath("$.days[0].alarms.length()").value(0))
+                .andExpect(jsonPath("$.days[1].records.length()").value(3))
+                .andExpect(jsonPath("$.days[1].dayType").value(DayType.TUESDAY.toString()))
+                .andExpect(jsonPath("$.days[1].date").value("2018-01-02"))
+                .andExpect(jsonPath("$.days[1].alarms.length()").value(1))
+                .andExpect(jsonPath("$.days[1].alarms.[0].type").value("INCOMPLETE"));
+    }
 
-        private TemporalStringMatcher(String dateTime) {
-            this.matcher = ZonedDateTimeMatchers.within(0, ChronoUnit.SECONDS, ZonedDateTime.parse(dateTime));
-        }
-
-        @Override
-        public boolean matches(Object actual) {
-            return this.matcher.matches(ZonedDateTime.parse((String) actual));
-        }
-
-        @Override
-        public void describeTo(Description description) {
-            this.matcher.describeTo(description);
-        }
-
-        private static TemporalStringMatcher match(String dateTime) {
-            return new TemporalStringMatcher(dateTime);
-        }
+    private void createAlarmConfiguration() {
+        AlarmConfiguration configuration = new AlarmConfiguration();
+        configuration.setBusinessId("1");
+        configuration.setDescription("Incomplete days");
+        configuration.setActive(true);
+        configuration.setType(AlarmType.INCOMPLETE);
+        configuration.setFromDate(ZonedDateTime.parse("2018-01-01T00:00:00.000Z"));
+        configuration.setToDate(ZonedDateTime.parse("2018-12-31T23:59:59.999Z"));
+        configuration.setDays(new ArrayList<>(7));
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(0).setDayWeek(DayType.MONDAY);
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(1).setDayWeek(DayType.TUESDAY);
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(2).setDayWeek(DayType.WEDNESDAY);
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(3).setDayWeek(DayType.THURSDAY);
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(4).setDayWeek(DayType.FRIDAY);
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(5).setDayWeek(DayType.SATURDAY);
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(6).setDayWeek(DayType.SUNDAY);
+        alarmRepository.save(configuration);
     }
 
 }

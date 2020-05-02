@@ -277,8 +277,8 @@ public class RecordControllerIT {
                 .andExpect(jsonPath("$.days[1].records.length()").value(6))
                 .andExpect(jsonPath("$.days[1].dayType").value(DayType.TUESDAY.toString()))
                 .andExpect(jsonPath("$.days[1].date").value("2018-01-02"))
-                .andExpect(jsonPath("$.days[0].workTime").value(8.25))
-                .andExpect(jsonPath("$.days[0].restTime").value(0.25))
+                .andExpect(jsonPath("$.days[1].workTime").value(8.25))
+                .andExpect(jsonPath("$.days[1].restTime").value(0.25))
                 .andExpect(jsonPath("$.days[1].alarms.length()").value(1))
                 .andExpect(jsonPath("$.days[1].alarms.[0].type").value(AlarmType.MAX_WORKING_HOURS.toString()));
     }
@@ -313,6 +313,96 @@ public class RecordControllerIT {
         configuration.getDays().add(new AlarmConfigurationDays());
         configuration.getDays().get(6).setDayWeek(DayType.SUNDAY);
         configuration.getDays().get(6).setValueN(BigDecimal.valueOf(1));
+        alarmRepository.save(configuration);
+    }
+
+    @Test
+    @Transactional
+    public void getWeekByEmployeeAndDatesWithAlarmMinEntryTime() throws Exception {
+        importRealJsonData("/data/file_alarm_record_min_entry_time.json", 26);
+        createAlarmConfigurationMinEntryTime();
+
+        restRecordMockMvc.perform(get("/api/records/{employeeId}/{fromDate}/{toDate}", "111111111",
+                "2018-01-01", "2018-01-07")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.days.length()").value(7))
+                .andExpect(jsonPath("$.days[0].records.length()").value(6))
+                .andExpect(jsonPath("$.days[0].dayType").value(DayType.MONDAY.toString()))
+                .andExpect(jsonPath("$.days[0].date").value("2018-01-01"))
+                .andExpect(jsonPath("$.days[0].workTime").value(8.25))
+                .andExpect(jsonPath("$.days[0].restTime").value(0.25))
+                .andExpect(jsonPath("$.days[0].alarms.length()").value(0))
+
+                .andExpect(jsonPath("$.days[1].records.length()").value(6))
+                .andExpect(jsonPath("$.days[1].dayType").value(DayType.TUESDAY.toString()))
+                .andExpect(jsonPath("$.days[1].date").value("2018-01-02"))
+                .andExpect(jsonPath("$.days[1].workTime").value(8.25))
+                .andExpect(jsonPath("$.days[1].restTime").value(0.25))
+                .andExpect(jsonPath("$.days[1].alarms.length()").value(0))
+
+                .andExpect(jsonPath("$.days[2].records.length()").value(6))
+                .andExpect(jsonPath("$.days[2].dayType").value(DayType.WEDNESDAY.toString()))
+                .andExpect(jsonPath("$.days[2].date").value("2018-01-03"))
+                .andExpect(jsonPath("$.days[2].workTime").value(8.25))
+                .andExpect(jsonPath("$.days[2].restTime").value(0.25))
+                .andExpect(jsonPath("$.days[2].alarms.length()").value(0))
+
+                .andExpect(jsonPath("$.days[3].records.length()").value(6))
+                .andExpect(jsonPath("$.days[3].dayType").value(DayType.THURSDAY.toString()))
+                .andExpect(jsonPath("$.days[3].date").value("2018-01-04"))
+                .andExpect(jsonPath("$.days[3].workTime").value(8.25))
+                .andExpect(jsonPath("$.days[3].restTime").value(0.25))
+                .andExpect(jsonPath("$.days[3].alarms.length()").value(1))
+                .andExpect(jsonPath("$.days[3].alarms.[0].type").value(AlarmType.MIN_ENTRY_TIME.toString()))
+
+                .andExpect(jsonPath("$.days[4].records.length()").value(2))
+                .andExpect(jsonPath("$.days[4].dayType").value(DayType.FRIDAY.toString()))
+                .andExpect(jsonPath("$.days[4].date").value("2018-01-05"))
+                .andExpect(jsonPath("$.days[4].workTime").value(7))
+                .andExpect(jsonPath("$.days[4].restTime").value(0))
+                .andExpect(jsonPath("$.days[4].alarms.length()").value(0))
+
+                .andExpect(jsonPath("$.days[5].records.length()").value(0))
+                .andExpect(jsonPath("$.days[5].dayType").value(DayType.SATURDAY.toString()))
+                .andExpect(jsonPath("$.days[5].date").value("2018-01-06"))
+                .andExpect(jsonPath("$.days[5].workTime").value(0))
+                .andExpect(jsonPath("$.days[5].restTime").value(0))
+                .andExpect(jsonPath("$.days[5].alarms.length()").value(0))
+
+                .andExpect(jsonPath("$.days[6].records.length()").value(0))
+                .andExpect(jsonPath("$.days[6].dayType").value(DayType.SUNDAY.toString()))
+                .andExpect(jsonPath("$.days[6].date").value("2018-01-07"))
+                .andExpect(jsonPath("$.days[6].workTime").value(0))
+                .andExpect(jsonPath("$.days[6].restTime").value(0))
+                .andExpect(jsonPath("$.days[6].alarms.length()").value(0));
+    }
+
+    private void createAlarmConfigurationMinEntryTime() {
+        AlarmConfiguration configuration = new AlarmConfiguration();
+        configuration.setBusinessId("1");
+        configuration.setDescription("Min entry time");
+        configuration.setActive(true);
+        configuration.setType(AlarmType.MIN_ENTRY_TIME);
+        configuration.setFromDate(ZonedDateTime.parse("2018-01-01T00:00:00.000Z"));
+        configuration.setToDate(ZonedDateTime.parse("2018-12-31T23:59:59.999Z"));
+        configuration.setDays(new ArrayList<>(5));
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(0).setDayWeek(DayType.MONDAY);
+        configuration.getDays().get(0).setValueS("08:00:00");
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(1).setDayWeek(DayType.TUESDAY);
+        configuration.getDays().get(1).setValueS("08:00:00");
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(2).setDayWeek(DayType.WEDNESDAY);
+        configuration.getDays().get(2).setValueS("08:00:00");
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(3).setDayWeek(DayType.THURSDAY);
+        configuration.getDays().get(3).setValueS("08:00:00");
+        configuration.getDays().add(new AlarmConfigurationDays());
+        configuration.getDays().get(4).setDayWeek(DayType.FRIDAY);
+        configuration.getDays().get(4).setValueS("07:00:00");
         alarmRepository.save(configuration);
     }
 

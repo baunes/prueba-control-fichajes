@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,8 @@ public class AlarmService {
                 checkIncomplete(recordsDayDTO, days).ifPresent(alarms::add);
             } else if (AlarmType.MAX_WORKING_HOURS.equals(configuration.getType())) {
                 checkMaxWorkingHours(recordsDayDTO, days).ifPresent(alarms::add);
+            } else if (AlarmType.MIN_ENTRY_TIME.equals(configuration.getType())) {
+                checkMinEntryTime(recordsDayDTO, days).ifPresent(alarms::add);
             }
         }
         return Optional.of(alarms);
@@ -62,10 +65,21 @@ public class AlarmService {
     }
 
     private Optional<DayAlarmDTO> checkMaxWorkingHours(RecordsDayDTO recordsDayDTO, Map<DayType, AlarmConfigurationDays> days) {
-        if (days.containsKey(ModelUtils.fromDayOfWeek(recordsDayDTO.getRecords().get(0).getDate().getDayOfWeek()))) {
+        if (days.containsKey(recordsDayDTO.getDayType())) {
             AlarmConfigurationDays conf = days.get(recordsDayDTO.getDayType());
             if (recordsDayDTO.getWorkTime().compareTo(conf.getValueN()) > 0) {
                 return Optional.of(DayAlarmDTO.builder().type(AlarmType.MAX_WORKING_HOURS).build());
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<DayAlarmDTO> checkMinEntryTime(RecordsDayDTO recordsDayDTO, Map<DayType, AlarmConfigurationDays> days) {
+        if (days.containsKey(recordsDayDTO.getDayType())) {
+            AlarmConfigurationDays conf = days.get(recordsDayDTO.getDayType());
+            LocalTime minEntryTime = LocalTime.parse(conf.getValueS());
+            if (recordsDayDTO.getRecords().get(0).getDate().toLocalTime().isBefore(minEntryTime)) {
+                return Optional.of(DayAlarmDTO.builder().type(AlarmType.MIN_ENTRY_TIME).build());
             }
         }
         return Optional.empty();

@@ -2,6 +2,6 @@ package com.prueba.controlfichajes.model.alarms;
 
 public enum AlarmType {
     INCOMPLETE,
-    JORANADA_MAXIMA,
+    MAX_WORKING_HOURS,
     HORA_ENTRADA_MINIMA
 }

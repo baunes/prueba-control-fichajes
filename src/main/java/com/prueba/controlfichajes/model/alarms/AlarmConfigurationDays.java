@@ -22,9 +22,15 @@ public class AlarmConfigurationDays {
     @Column(name = "day_week")
     private DayType dayWeek;
 
+    /**
+     * String value
+     */
     @Column(name = "value_s")
     private String valueS;
 
+    /**
+     * Numeric value
+     */
     @Column(name = "value_n", precision = 15, scale = 2)
     private BigDecimal valueN;
 

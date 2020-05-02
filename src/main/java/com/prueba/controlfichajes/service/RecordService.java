@@ -88,7 +88,7 @@ public class RecordService {
 
     private void fillTimeAndAlarms(RecordsDayDTO day) {
         fillTime(day);
-        alarmService.checkRecordsWithAlarms(day.getRecords()).ifPresent(day.getAlarms()::addAll);
+        alarmService.checkRecordsWithAlarms(day).ifPresent(day.getAlarms()::addAll);
     }
 
     private void fillTime(RecordsDayDTO recordsDayDTO) {

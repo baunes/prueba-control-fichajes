@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,12 @@ public class RecordsDayDTO {
     private LocalDate date;
 
     private List<RecordDTO> records;
+
+    @Builder.Default
+    private BigDecimal workTime = BigDecimal.ZERO;
+
+    @Builder.Default
+    private BigDecimal restTime = BigDecimal.ZERO;
 
     @Builder.Default
     private List<DayAlarmDTO> alarms = new ArrayList<>();

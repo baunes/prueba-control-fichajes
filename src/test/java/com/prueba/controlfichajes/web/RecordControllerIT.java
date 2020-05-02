@@ -12,7 +12,6 @@ import com.prueba.controlfichajes.repository.AlarmRepository;
 import com.prueba.controlfichajes.repository.RecordRepository;
 import com.prueba.controlfichajes.tests.TemporalStringMatcher;
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,8 +20,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.time.DayOfWeek;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -159,7 +158,7 @@ public class RecordControllerIT {
     @Test
     @Transactional
     public void getWeekByEmployeeAndDates() throws Exception {
-        importRealJsonData("/data/fichero_week.json", 102);
+        importRealJsonData("/data/file_week.json", 156);
 
         restRecordMockMvc.perform(get("/api/records/{employeeId}/{fromDate}/{toDate}", "111111111",
                 "2018-01-01", "2018-01-07")
@@ -167,34 +166,48 @@ public class RecordControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.days.length()").value(7))
-                .andExpect(jsonPath("$.days[0].records.length()").value(4))
+                .andExpect(jsonPath("$.days[0].records.length()").value(6))
                 .andExpect(jsonPath("$.days[0].dayType").value(DayType.MONDAY.toString()))
                 .andExpect(jsonPath("$.days[0].date").value("2018-01-01"))
-                .andExpect(jsonPath("$.days[1].records.length()").value(4))
+                .andExpect(jsonPath("$.days[0].workTime").value(8.25))
+                .andExpect(jsonPath("$.days[0].restTime").value(0.25))
+                .andExpect(jsonPath("$.days[1].records.length()").value(6))
                 .andExpect(jsonPath("$.days[1].dayType").value(DayType.TUESDAY.toString()))
                 .andExpect(jsonPath("$.days[1].date").value("2018-01-02"))
-                .andExpect(jsonPath("$.days[2].records.length()").value(4))
+                .andExpect(jsonPath("$.days[1].workTime").value(8.25))
+                .andExpect(jsonPath("$.days[1].restTime").value(0.25))
+                .andExpect(jsonPath("$.days[2].records.length()").value(6))
                 .andExpect(jsonPath("$.days[2].dayType").value(DayType.WEDNESDAY.toString()))
                 .andExpect(jsonPath("$.days[2].date").value("2018-01-03"))
-                .andExpect(jsonPath("$.days[3].records.length()").value(4))
+                .andExpect(jsonPath("$.days[2].workTime").value(8.25))
+                .andExpect(jsonPath("$.days[2].restTime").value(0.25))
+                .andExpect(jsonPath("$.days[3].records.length()").value(6))
                 .andExpect(jsonPath("$.days[3].dayType").value(DayType.THURSDAY.toString()))
                 .andExpect(jsonPath("$.days[3].date").value("2018-01-04"))
+                .andExpect(jsonPath("$.days[3].workTime").value(8.25))
+                .andExpect(jsonPath("$.days[3].restTime").value(0.25))
                 .andExpect(jsonPath("$.days[4].records.length()").value(2))
                 .andExpect(jsonPath("$.days[4].dayType").value(DayType.FRIDAY.toString()))
                 .andExpect(jsonPath("$.days[4].date").value("2018-01-05"))
+                .andExpect(jsonPath("$.days[4].workTime").value(7))
+                .andExpect(jsonPath("$.days[4].restTime").value(0))
                 .andExpect(jsonPath("$.days[5].records.length()").value(0))
                 .andExpect(jsonPath("$.days[5].dayType").value(DayType.SATURDAY.toString()))
                 .andExpect(jsonPath("$.days[5].date").value("2018-01-06"))
+                .andExpect(jsonPath("$.days[5].workTime").value(0))
+                .andExpect(jsonPath("$.days[5].restTime").value(0))
                 .andExpect(jsonPath("$.days[6].records.length()").value(0))
                 .andExpect(jsonPath("$.days[6].dayType").value(DayType.SUNDAY.toString()))
-                .andExpect(jsonPath("$.days[6].date").value("2018-01-07"));
+                .andExpect(jsonPath("$.days[6].date").value("2018-01-07"))
+                .andExpect(jsonPath("$.days[6].workTime").value(0))
+                .andExpect(jsonPath("$.days[6].restTime").value(0));
     }
 
     @Test
     @Transactional
-    public void getWeekByEmployeeAndDatesWithAlarms() throws Exception {
-        importRealJsonData("/data/file_alarm_record_incomplete.json", 7);
-        createAlarmConfiguration();
+    public void getWeekByEmployeeAndDatesWithAlarmIncomplete() throws Exception {
+        importRealJsonData("/data/file_alarm_record_incomplete.json", 11);
+        createAlarmConfigurationIncomplete();
 
         restRecordMockMvc.perform(get("/api/records/{employeeId}/{fromDate}/{toDate}", "111111111",
                 "2018-01-01", "2018-01-02")
@@ -202,21 +215,25 @@ public class RecordControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.days.length()").value(2))
-                .andExpect(jsonPath("$.days[0].records.length()").value(4))
+                .andExpect(jsonPath("$.days[0].records.length()").value(6))
                 .andExpect(jsonPath("$.days[0].dayType").value(DayType.MONDAY.toString()))
                 .andExpect(jsonPath("$.days[0].date").value("2018-01-01"))
+                .andExpect(jsonPath("$.days[0].workTime").value(8.25))
+                .andExpect(jsonPath("$.days[0].restTime").value(0.25))
                 .andExpect(jsonPath("$.days[0].alarms.length()").value(0))
-                .andExpect(jsonPath("$.days[1].records.length()").value(3))
+                .andExpect(jsonPath("$.days[1].records.length()").value(5))
                 .andExpect(jsonPath("$.days[1].dayType").value(DayType.TUESDAY.toString()))
                 .andExpect(jsonPath("$.days[1].date").value("2018-01-02"))
+                .andExpect(jsonPath("$.days[1].workTime").value(5.25))
+                .andExpect(jsonPath("$.days[1].restTime").value(0.25))
                 .andExpect(jsonPath("$.days[1].alarms.length()").value(1))
-                .andExpect(jsonPath("$.days[1].alarms.[0].type").value("INCOMPLETE"));
+                .andExpect(jsonPath("$.days[1].alarms.[0].type").value(AlarmType.INCOMPLETE.toString()));
     }
 
-    private void createAlarmConfiguration() {
+    private void createAlarmConfigurationIncomplete() {
         AlarmConfiguration configuration = new AlarmConfiguration();
         configuration.setBusinessId("1");
-        configuration.setDescription("Incomplete days");
+        configuration.setDescription("Incomplete day");
         configuration.setActive(true);
         configuration.setType(AlarmType.INCOMPLETE);
         configuration.setFromDate(ZonedDateTime.parse("2018-01-01T00:00:00.000Z"));

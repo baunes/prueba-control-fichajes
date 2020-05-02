@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prueba.controlfichajes.ControlFichajesApplication;
 import com.prueba.controlfichajes.dto.RecordDTOMapper;
 import com.prueba.controlfichajes.model.Record;
+import com.prueba.controlfichajes.model.DayType;
 import com.prueba.controlfichajes.repository.RecordRepository;
 import org.apache.commons.io.IOUtils;
 import org.exparity.hamcrest.date.ZonedDateTimeMatchers;
@@ -152,14 +153,36 @@ public class RecordControllerIT {
 
     @Test
     @Transactional
-    public void getWeekByEmployeeAndDates() throws Exception {
+    public void getWeekByEmployeeAndDates2() throws Exception {
         importRealJsonData("/data/fichero_week.json", 102);
 
         restRecordMockMvc.perform(get("/api/records/{employeeId}/{fromDate}/{toDate}", "111111111",
                 "2018-01-01", "2018-01-07")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.days.length()").value(7))
+                .andExpect(jsonPath("$.days[0].records.length()").value(4))
+                .andExpect(jsonPath("$.days[0].dayType").value(DayType.MONDAY.toString()))
+                .andExpect(jsonPath("$.days[0].date").value("2018-01-01"))
+                .andExpect(jsonPath("$.days[1].records.length()").value(4))
+                .andExpect(jsonPath("$.days[1].dayType").value(DayType.TUESDAY.toString()))
+                .andExpect(jsonPath("$.days[1].date").value("2018-01-02"))
+                .andExpect(jsonPath("$.days[2].records.length()").value(4))
+                .andExpect(jsonPath("$.days[2].dayType").value(DayType.WEDNESDAY.toString()))
+                .andExpect(jsonPath("$.days[2].date").value("2018-01-03"))
+                .andExpect(jsonPath("$.days[3].records.length()").value(4))
+                .andExpect(jsonPath("$.days[3].dayType").value(DayType.THURSDAY.toString()))
+                .andExpect(jsonPath("$.days[3].date").value("2018-01-04"))
+                .andExpect(jsonPath("$.days[4].records.length()").value(2))
+                .andExpect(jsonPath("$.days[4].dayType").value(DayType.FRIDAY.toString()))
+                .andExpect(jsonPath("$.days[4].date").value("2018-01-05"))
+                .andExpect(jsonPath("$.days[5].records.length()").value(0))
+                .andExpect(jsonPath("$.days[5].dayType").value(DayType.SATURDAY.toString()))
+                .andExpect(jsonPath("$.days[5].date").value("2018-01-06"))
+                .andExpect(jsonPath("$.days[6].records.length()").value(0))
+                .andExpect(jsonPath("$.days[6].dayType").value(DayType.SUNDAY.toString()))
+                .andExpect(jsonPath("$.days[6].date").value("2018-01-07"));
     }
 
     private static class TemporalStringMatcher extends BaseMatcher<String> {

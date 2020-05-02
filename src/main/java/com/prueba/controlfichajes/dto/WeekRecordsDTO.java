@@ -10,7 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WeekRecordsDTO {
-    // TODO Refactor class
 
     @NotNull
     @Singular("monday")

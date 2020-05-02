@@ -1,7 +1,7 @@
 package com.prueba.controlfichajes.web;
 
 import com.prueba.controlfichajes.dto.RecordDTO;
-import com.prueba.controlfichajes.dto.WeekRecordsDTO;
+import com.prueba.controlfichajes.dto.RecordsRangeDTO;
 import com.prueba.controlfichajes.service.RecordService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -40,12 +40,12 @@ public class RecordController {
     }
 
     @GetMapping(RecordController.URI_BASE + "/{employeeId}/{fromDate}/{toDate}")
-    public ResponseEntity<WeekRecordsDTO> getWeek(
+    public ResponseEntity<RecordsRangeDTO> getRange(
             @PathVariable String employeeId,
             @PathVariable String fromDate,
             @PathVariable String toDate) {
         return ResponseEntity
-                .ok(recordService.getWeekRecords(employeeId, LocalDate.parse(fromDate), LocalDate.parse(toDate)));
+                .ok(recordService.getRangeRecords(employeeId, LocalDate.parse(fromDate), LocalDate.parse(toDate)));
     }
 
 }

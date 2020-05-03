@@ -30,9 +30,10 @@ public class RecordServiceTest {
     private RecordRepository recordRepository;
 
     @BeforeEach
-    public void setUpTest(@Mock RecordRepository recordRepository, @Mock AlarmService alarmService) {
+    public void setUpTest(@Mock RecordRepository recordRepository, @Mock AlarmService alarmService,
+                          @Mock WorkDayService workDayService) {
         this.recordRepository = recordRepository;
-        this.service = new RecordService(recordRepository, new RecordDTOMapperImpl(), alarmService);
+        this.service = new RecordService(recordRepository, new RecordDTOMapperImpl(), alarmService, workDayService);
     }
 
     @Test

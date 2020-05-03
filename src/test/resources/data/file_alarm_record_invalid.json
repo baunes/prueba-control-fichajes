@@ -1,0 +1,18 @@
+[
+ {
+  "businessId": 1,
+  "date": "2018-01-01T08:00:00.000Z",
+  "employeeId": 111111111,
+  "recordType": "IN",
+  "serviceId": "USER1",
+  "type": "WORK"
+ },
+ {
+  "businessId": 1,
+  "date": "2018-01-01T10:00:00.000Z",
+  "employeeId": 111111111,
+  "recordType": "IN",
+  "serviceId": "USER1",
+  "type": "WORK"
+ }
+]

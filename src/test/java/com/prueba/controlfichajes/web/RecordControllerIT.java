@@ -406,4 +406,31 @@ public class RecordControllerIT {
         alarmRepository.save(configuration);
     }
 
+    @Test
+    @Transactional
+    public void getWeekByEmployeeAndDatesWithInvalidRecords() throws Exception {
+        importRealJsonData("/data/file_alarm_record_invalid.json", 2);
+        createAlarmConfigurationIncomplete();
+
+        restRecordMockMvc.perform(get("/api/records/{employeeId}/{fromDate}/{toDate}", "111111111",
+                "2018-01-01", "2018-01-02")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.days.length()").value(2))
+                .andExpect(jsonPath("$.days[0].records.length()").value(2))
+                .andExpect(jsonPath("$.days[0].dayType").value(DayType.MONDAY.toString()))
+                .andExpect(jsonPath("$.days[0].date").value("2018-01-01"))
+                .andExpect(jsonPath("$.days[0].workTime").value(0))
+                .andExpect(jsonPath("$.days[0].restTime").value(0))
+                .andExpect(jsonPath("$.days[0].alarms.length()").value(1))
+                .andExpect(jsonPath("$.days[0].alarms.[0].type").value(AlarmType.INTEGRITY.toString()))
+                .andExpect(jsonPath("$.days[1].records.length()").value(0))
+                .andExpect(jsonPath("$.days[1].dayType").value(DayType.TUESDAY.toString()))
+                .andExpect(jsonPath("$.days[1].date").value("2018-01-02"))
+                .andExpect(jsonPath("$.days[1].workTime").value(0))
+                .andExpect(jsonPath("$.days[1].restTime").value(0))
+                .andExpect(jsonPath("$.days[1].alarms.length()").value(0));
+    }
+
 }

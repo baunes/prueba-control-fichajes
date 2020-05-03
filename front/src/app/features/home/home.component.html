@@ -27,8 +27,56 @@
                 </ng-template>
             </p-fileUpload>
         </div>
+
+        <div>
+            <h3 class="first">List records</h3>
+            <div class="ui-g">
+                <div class="ui-g">
+                    <span class="ui-g-12">Employee Id</span>
+                    <div class="ui-g-12"><input id="float-input" type="text" size="30" pInputText [(ngModel)]="employeeId"></div>
+                </div>
+                <div class="ui-g">
+                    <span class="ui-g-12">Range Dates</span>
+                    <div class="ui-g-12">
+                        <p-calendar
+                                [(ngModel)]="rangeDates"
+                                selectionMode="range"
+                                [readonlyInput]="true"
+                                [showIcon]="true"
+                        ></p-calendar>
+                    </div>
+
+                </div>
+
+                <div class="ui-g">
+                    <span class="ui-g-12">&nbsp;</span>
+                    <p-button label="List records" (onClick)="listRecords($event)"></p-button>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <p-table [value]="records">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th>Work Time</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-day>
+                    <tr>
+                        <td>{{formatDateFromArray(day.date) | date: 'dd/MM/yyyy'}} <i *ngIf="day.alarms.length > 0" class="pi pi-exclamation-triangle"></i></td>
+                        <td></td>
+                        <td>{{day.workTime}}</td>
+                    </tr>
+                    <tr *ngFor="let record of day.records">
+                        <td></td>
+                        <td>{{formatDateFromTimestamp(record.date) | date: 'hh:mm'}}</td>
+                        <td>{{record.serviceId}} - {{record.recordType}}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
     </main>
-    <footer>
-        Footer
-    </footer>
 </div>

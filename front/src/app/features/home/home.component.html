@@ -11,7 +11,21 @@
     </header>
     <main class="home-component-body">
         <div>
-            Body
+            <p-toast key="my-toast" [style]="{marginTop: '80px'}"></p-toast>
+
+            <h3 class="first">Import time records</h3>
+            <p-fileUpload name="file"
+                    url="{{importUrl}}"
+                    (onUpload)="onUpload($event)"
+                    (onError)="onError($event)"
+                    accept="application/json"
+                    maxFileSize="10000000">
+                <ng-template pTemplate="content">
+                    <ul *ngIf="uploadedFiles.length">
+                        <li *ngFor="let file of uploadedFiles">{{file.name}} - {{file.size}} bytes</li>
+                    </ul>
+                </ng-template>
+            </p-fileUpload>
         </div>
     </main>
     <footer>

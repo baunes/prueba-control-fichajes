@@ -1,5 +1,6 @@
 package com.prueba.controlfichajes.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prueba.controlfichajes.dto.RecordDTO;
 import com.prueba.controlfichajes.dto.RecordDTOMapperImpl;
 import com.prueba.controlfichajes.model.records.Record;
@@ -31,9 +32,10 @@ public class RecordServiceTest {
 
     @BeforeEach
     public void setUpTest(@Mock RecordRepository recordRepository, @Mock AlarmService alarmService,
-                          @Mock WorkDayService workDayService) {
+                          @Mock WorkDayService workDayService, @Mock ObjectMapper objectMapper) {
         this.recordRepository = recordRepository;
-        this.service = new RecordService(recordRepository, new RecordDTOMapperImpl(), alarmService, workDayService);
+        this.service = new RecordService(recordRepository, new RecordDTOMapperImpl(), alarmService, workDayService,
+                objectMapper);
     }
 
     @Test

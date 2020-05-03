@@ -1,5 +1,7 @@
 package com.prueba.controlfichajes.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prueba.controlfichajes.dto.*;
 import com.prueba.controlfichajes.model.ModelUtils;
 import com.prueba.controlfichajes.model.alarms.AlarmType;
@@ -10,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -27,6 +31,7 @@ public class RecordService {
     private final RecordDTOMapper recordDTOMapper;
     private final AlarmService alarmService;
     private final WorkDayService workDayService;
+    private final ObjectMapper objectMapper;
 
     public RecordDTO create(RecordDTO dto) {
         Record record = this.recordDTOMapper.toEntity(dto);
@@ -38,6 +43,17 @@ public class RecordService {
         List<Record> records = this.recordDTOMapper.toEntityList(dtos);
         records = this.recordRepository.saveAll(records);
         return this.recordDTOMapper.toDtoList(records);
+    }
+
+    public List<RecordDTO> importAll(InputStream inputStream) throws IOException {
+        List<RecordDTO> dtos = inputStreamToRecordDTOList(inputStream);
+        List<Record> records = this.recordDTOMapper.toEntityList(dtos);
+        records = this.recordRepository.saveAll(records);
+        return this.recordDTOMapper.toDtoList(records);
+    }
+
+    private List<RecordDTO> inputStreamToRecordDTOList(InputStream inputStream) throws IOException {
+        return objectMapper.readValue(inputStream, new TypeReference<List<RecordDTO>>() { });
     }
 
     /**

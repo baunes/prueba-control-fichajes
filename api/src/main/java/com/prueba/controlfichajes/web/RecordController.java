@@ -6,8 +6,10 @@ import com.prueba.controlfichajes.service.RecordService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
@@ -46,6 +48,14 @@ public class RecordController {
             @PathVariable String toDate) {
         return ResponseEntity
                 .ok(recordService.getRangeRecordsWithAlarms(employeeId, LocalDate.parse(fromDate), LocalDate.parse(toDate)));
+    }
+
+    @PostMapping(RecordController.URI_BASE + "/import")
+    public ResponseEntity<List<RecordDTO>> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, URISyntaxException {
+        List<RecordDTO> created = recordService.importAll(file.getInputStream());
+        return ResponseEntity
+                .created(new URI(URI_BASE))
+                .body(created);
     }
 
 }

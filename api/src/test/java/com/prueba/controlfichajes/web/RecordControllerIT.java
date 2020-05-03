@@ -17,7 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -146,6 +149,41 @@ public class RecordControllerIT {
         restRecordMockMvc.perform(post("/api/records/all")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.length()").value(length));
+
+        // Validate the Record in the database
+        List<Record> recordList = recordRepository.findAll();
+        assertThat(recordList).hasSize(databaseSizeBeforeCreate + length);
+    }
+
+
+
+    @Test
+    @Transactional
+    public void importFile1() throws Exception {
+        importJsonFile("/data/fichero_1.json", 395);
+    }
+
+    @Test
+    @Transactional
+    public void importFile2() throws Exception {
+        importJsonFile("/data/fichero_2.json", 491);
+    }
+
+    private void importJsonFile(String file, int length) throws Exception {
+        int databaseSizeBeforeCreate = recordRepository.findAll().size();
+
+        MockMultipartFile mockMultipartFile = new MockMultipartFile("file", file,
+                "application/json", this.getClass().getResourceAsStream(file));
+
+        // Import file
+        MockHttpServletRequestBuilder builder =
+                MockMvcRequestBuilders.multipart("/api/records/import")
+                        .file(mockMultipartFile);
+
+        restRecordMockMvc.perform(builder)
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.length()").value(length));
